@@ -13,7 +13,11 @@ import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFunction;
 
 import scala.Tuple2;
-
+/*
+ * -Xms256m
+-Xmx1024m
+ * 
+ */
 public class BasicOperations {
 
 	public static void main(String args[]){
@@ -22,7 +26,7 @@ public class BasicOperations {
 	JavaSparkContext sc = new JavaSparkContext(conf);
 
 	
-	JavaRDD<String> distFile = sc.textFile("C:/Users/vibushanan.somasunda/Desktop/SampleIP.txt", 2);
+	JavaRDD<String> distFile = sc.textFile("C:/Users/vibushanan.somasunda/Desktop/WekaPO.csv", 2);
 	
 	JavaPairRDD<String, Integer> place = distFile.mapToPair(new PairFunction<String,String,Integer>(){
 
@@ -35,7 +39,6 @@ public class BasicOperations {
 		
 	});
 	
-	place.collect();
-	
+	System.out.println(distFile.count());	
 	}
 }
