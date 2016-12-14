@@ -2,6 +2,7 @@ package sqlSpark;
 
 import static org.apache.spark.sql.functions.col;
 
+import org.apache.spark.rdd.RDD;
 import org.apache.spark.sql.DataFrameStatFunctions;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Encoder;
@@ -25,10 +26,17 @@ public class DataFrameBasics {
 	             .appName("Streaming")
 	             .getOrCreate();
 
-		
-Dataset<Row> matchRecds = spark.read().csv("D:/Downloads/t20_csv/t20_csv/211028.csv").filter(col("_c0").$eq$eq$eq("ball"));
 
+
+//DataFrame		
+Dataset<Row> matchRecds = spark.read().csv("D:/Downloads/t20_csv/t20_csv/211028.csv");
+
+//Dataset
 Dataset<String> matchRecds1  = spark.read().textFile("D:/Downloads/t20_csv/t20_csv/211028.csv");
+
+
+
+//DataFrame to RDD .toJavaRDD
 
 JavaRDD<String> matchRecdsRDD = matchRecds1.toJavaRDD().filter(new Function<String,Boolean>(){
 
@@ -43,6 +51,7 @@ JavaRDD<String> matchRecdsRDD = matchRecds1.toJavaRDD().filter(new Function<Stri
 	}
 	
 });
+
 
 
 JavaRDD<Scoring> matchRecdsRDD1  = matchRecdsRDD.map(new Function<String,Scoring>(){
@@ -66,19 +75,21 @@ JavaRDD<Scoring> matchRecdsRDD1  = matchRecdsRDD.map(new Function<String,Scoring
 });
 
 
-
+//Java RDD to Dataframe
 Encoder<Scoring> personEncoder = Encoders.bean(Scoring.class);
 
 
 
 Dataset<Row> onr = spark.createDataFrame(matchRecdsRDD1, Scoring.class);
 
+//-------------------------------------------------------
+
 onr.show();
 
 
-/*onr.createOrReplaceTempView("Match1");
+onr.createOrReplaceTempView("Match1");
 
-onr.cube(col("batCountry"),col("batsMan1Run")).count().show();*/
+onr.cube(col("batCountry"),col("batsMan1Run")).count().show();
 
 DataFrameStatFunctions stats = onr.where(col("BatCountry").$eq$eq$eq("England")).groupBy("Bowler").count().stat();
 
@@ -86,6 +97,27 @@ DataFrameStatFunctions stats = onr.where(col("BatCountry").$eq$eq$eq("England"))
 
 
 
+//Dataset to Java RDD ???
+
+
+JavaRDD<String>  DSJRDD = matchRecds1.toJavaRDD();
+
+
+
+//Java RDD to Dataset Java RDD to RDD and same create Dataset methos
+
+RDD<String> rdd =DSJRDD.toRDD(DSJRDD);
+
+
+
+Dataset<String> dsf = spark.createDataset(rdd, Encoders.STRING());
+
+dsf.show();
+
+
+dsf.write().format("com.databricks.spark.csv")
+.option("header", "true")
+.csv("file:///D:/New folder (3)/SparkPractise/out21.csv");
 //spark.sql("Select  Bowler,Count(Bowler)/6 as Overs from Match1 where BatCountry = \"England\" group by Bowler").show();
 
 

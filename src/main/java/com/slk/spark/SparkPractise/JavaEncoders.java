@@ -4,13 +4,22 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
 
+import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.api.java.function.ForeachFunction;
+import org.apache.spark.api.java.function.MapFunction;
+import org.apache.spark.api.java.function.VoidFunction;
+import org.apache.spark.rdd.RDD;
 import org.apache.spark.sql.Column;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Encoder;
 import org.apache.spark.sql.Encoders;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
+
+import scala.Function1;
+import scala.runtime.BoxedUnit;
 
 public class JavaEncoders {
 
@@ -43,15 +52,15 @@ public class JavaEncoders {
 				  .builder().master("local[*]").config("spark.sql.warehouse.dir", "file///C:/Users/vibushanan.somasunda/Desktop")
 				  .appName("Java Spark SQL Example").getOrCreate();
 	
-		Person person = new Person();
-		person.setName("Andy");
-		person.setAge(32);
+
 		
-		/*Encoder<Integer> integerEncoder= Encoders.INT();
+		JavaSparkContext sc = new JavaSparkContext(spark.sparkContext());
 		
-		Dataset<Integer> DSInt = spark.createDataset(Arrays.asList(1,2,3), integerEncoder);
-	*/	
-	
+		
+		
+		
+		JavaRDD<String>  rdd = sc.textFile("person.json");
+		
 		
 		Encoder<Person> personEncoder = Encoders.bean(Person.class);
 		
@@ -59,15 +68,29 @@ public class JavaEncoders {
 		
 		
 		Dataset<Row> personrdd = spark.read().json("person.json");
+	
 		
-		df1.groupBy("age").min("age").show();
-		df1.show();
-		Dataset<Person> df2 = df1.alias("new Person");
+ df1.map(new MapFunction<Person,String>(){
+
+	public String call(Person value) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	 
+ }, Encoders.STRING());
+		
+		
+		
+		/*Dataset<Person> df2 = df1.alias("new Person");
+		
+		
 		df2.show();
 		
-		Column i =df2.apply("a");
+		Column i =df2.apply("age");
 		
-		System.out.println(i.toString());
+		df2.show();
+		
+		System.out.println(i.toString());*/
 		
 	}
 
